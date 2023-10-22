@@ -20,7 +20,7 @@ func (r *RepoScanner) ScanRepo() error {
 	dirName := getRepoName(r.repoPath)
 	branches, err := getAllBranches(dirName)
 
-	fmt.Println("All branches are", branches)
+	fmt.Println("\nAll branches are in the repoistry ", branches)
 
 	if err != nil {
 		fmt.Println("Error not getting branch ", err)
@@ -46,6 +46,7 @@ func (r *RepoScanner) scanBranch(branch, dirName string) error {
 	r.report.Write([]byte(msg))
 
 	commits, err := getAllCommits(dirName)
+	fmt.Println("Commits are " , commits)
 	if err != nil {
 		return nil
 	}

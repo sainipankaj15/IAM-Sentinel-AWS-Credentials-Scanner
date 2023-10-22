@@ -23,7 +23,7 @@ func scanDir(dirName string, out *os.File, cv CredentialValidator) error {
 		return err
 	}
 
-	// scan each file concurrently
+	// Scanning each file in depently in goroutine
 	wg := sync.WaitGroup{}
 	for _, file := range files {
 		if file.IsDir() {

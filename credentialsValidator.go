@@ -5,8 +5,7 @@ type CredentialValidator interface {
 	Validate(CloudCredentials) bool
 }
 
-// Function to scan content and match credentials
-// and validate any credentials found
+// Function for scanning content , finding credentails and if found then validing
 func ParseCredentials(content string, cv CredentialValidator) ([]CloudCredentials, error) {
 	res := []CloudCredentials{}
 	cc, err := cv.Match(content)

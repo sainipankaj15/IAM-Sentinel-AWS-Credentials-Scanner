@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-var RepoName string 
+var RepoName string
 
 func main() {
 	if len(os.Args) != 2 {
@@ -18,29 +18,35 @@ func main() {
 	repoPath := os.Args[1]
 
 	RepoName = repoPath
-	
-	// Step 1: Clone the Git repository locally
+
+	// Cloning git repo locally
 	err := cloneRepository(repoPath)
 	if err != nil {
 		fmt.Println("Error cloning the repository:", err)
 		return
 	}
 
-	// create a folder: logs
+	// Logs folder creating
 	err = os.Mkdir("logs", os.ModePerm)
+
 	if err != nil {
-		fmt.Println("Error creating folder - logs:", err)
+		if os.IsExist(err) {
+			// Folder already exists, no need to create it again
+			fmt.Println("\nLogs folder is already there")
+		}else {
+			fmt.Println("Error creating folder - logs:", err)
+		}
 	}
 
-	// create a file in logs/ to log the report of scanning
+	// Report file inside logs 
 	f, err := os.OpenFile("logs/"+getRepoName(repoPath)+"-result.txt", os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	rs := RepoScanner{report: f, repoPath: repoPath, cv: awsValidator{}}
-	// Traverse through all files in the repository to find potential AWS IAM keys
-	// through all branches and commit history
+
+	// Traversing all the branchs and commit 
 	err = rs.ScanRepo()
 	if err != nil {
 		fmt.Println("Error scanning repository:", err)
@@ -52,7 +58,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Step 3: Clean up cloned repository
+	// Removing the cloned repo as it is garbage for us
 	err = os.RemoveAll(getRepoName(repoPath))
 	if err != nil {
 		fmt.Println("Error cleaning up cloned repository:", err)

@@ -14,10 +14,10 @@ import (
 const awsKeyPattern = `(?m)(?i)AKIA[0-9A-Z]{16}\s+\S{40}|AWS[0-9A-Z]{38}\s+?\S{40}`
 
 
-// implements CredentialValidator interface
+// Struct
 type awsValidator struct{}
 
-// implementation of Match method specific to AWS
+// Implementatig Match method
 func (a awsValidator) Match(content string) ([]CloudCredentials, error) {
 	res := []CloudCredentials{}
 	regex := regexp.MustCompile(awsKeyPattern)
@@ -35,11 +35,12 @@ func (a awsValidator) Match(content string) ([]CloudCredentials, error) {
 
 }
 
-// implementation of Validate method specific to AWS
+// Implemenation of Validate
 func (a awsValidator) Validate(c CloudCredentials) bool {
 	return validateIAMKeys(c.Id, c.Secret)
 }
 
+// Implemenation of ValidateIAM keys
 func validateIAMKeys(accessKeyID, secretAccessKey string) bool {
 	// Create a new AWS session with the IAM keys
 	sess, _ := session.NewSession(&aws.Config{
@@ -53,7 +54,6 @@ func validateIAMKeys(accessKeyID, secretAccessKey string) bool {
 	// Basic API call to check the IAM keys' validity
 	d, err := svc.ListGroups(&iam.ListGroupsInput{})
 	if err != nil {
-
 		// InvalidClientTokenId error occurs for invalid keys.
 		return !strings.Contains(err.Error(), "InvalidClientTokenId")
 	}
