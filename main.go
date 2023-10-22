@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+var RepoName string 
+
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: go run main.go <path_to_git_repository>")
@@ -15,6 +17,8 @@ func main() {
 
 	repoPath := os.Args[1]
 
+	RepoName = repoPath
+	
 	// Step 1: Clone the Git repository locally
 	err := cloneRepository(repoPath)
 	if err != nil {

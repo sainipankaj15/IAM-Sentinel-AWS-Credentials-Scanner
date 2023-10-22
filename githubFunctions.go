@@ -94,12 +94,26 @@ func getRepoName(repoPath string) string {
 }
 
 func getAllBranches(dirName string) ([]string, error) {
-	cmd := exec.Command("git", "-C", "testing", "for-each-ref", "--format=%(refname:short)", "refs/heads/")
-	output, err := cmd.Output()
+
+	cmd := exec.Command("git", "ls-remote", "--heads", RepoName)
+	output, err := cmd.CombinedOutput()
+
 	if err != nil {
 		return nil, err
 	}
-	branches := strings.Split(strings.TrimSpace(string(output)), "\n")
+
+	// Extracting branch names from the output
+	var branches []string
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	for _, line := range lines {
+		parts := strings.Fields(line)
+		if len(parts) > 1 {
+			branchRef := parts[1]
+			branchName := strings.TrimPrefix(branchRef, "refs/heads/")
+			branches = append(branches, branchName)
+		}
+	}
+	// fmt.Println("bRANHCES ARE ", branches)
 	return branches, nil
 }
 
@@ -124,7 +138,7 @@ func getAllCommits(dirName string) ([]string, error) {
 	return commits, nil
 }
 
-// clone a repository locally; return error if any found
+// Cloning Repo locally
 func cloneRepository(repoPath string) error {
 	cmd := exec.Command("git", "clone", repoPath)
 	err := cmd.Run()

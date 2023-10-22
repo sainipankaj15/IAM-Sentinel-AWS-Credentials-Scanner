@@ -54,7 +54,6 @@ func scanFileStart(wg *sync.WaitGroup, name string , dirName string, out *os.Fil
 		return
 	}
 
-	// close the file after execution if
 	defer file.Close()
 
 	if err := scanFile(cv, file, out); err != nil {
