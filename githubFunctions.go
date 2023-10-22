@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"os"
@@ -41,12 +42,21 @@ func (r *RepoScanner) ScanRepo() error {
 func (r *RepoScanner) scanBranch(branch, dirName string) error {
 	switchToRef(branch, dirName)
 
-	msg := fmt.Sprintf("\tBranch: %s\n", branch)
+	msg := fmt.Sprintf("\t \nBranch: %s\n", branch)
 	fmt.Println(msg)
 	r.report.Write([]byte(msg))
 
 	commits, err := getAllCommits(dirName)
-	fmt.Println("Commits are " , commits)
+	fmt.Println("Total Commits are in this branch ", commits)
+
+	previousVerifiedCommits := AlreadyVerifiedCommit[branch]
+
+	diffCommits := diffCommits(commits, previousVerifiedCommits)
+
+	AlreadyVerifiedCommit[branch] = commits
+
+	commits = diffCommits
+
 	if err != nil {
 		return nil
 	}
@@ -144,4 +154,20 @@ func cloneRepository(repoPath string) error {
 	cmd := exec.Command("git", "clone", repoPath)
 	err := cmd.Run()
 	return err
+}
+
+func extractGitHubInfo(url string) (string, string, error) {
+	// Split the URL by "/"
+	parts := strings.Split(url, "/")
+
+	// Check if the URL format is as expected
+	if len(parts) == 5 && parts[0] == "https:" && parts[1] == "" && parts[2] == "github.com" {
+		username := parts[3]
+		repoName := parts[4]
+		return username, repoName, nil
+	}
+
+	err := errors.New("invalid github url")
+	// If the format is not as expected, return an error
+	return "", "", err
 }
