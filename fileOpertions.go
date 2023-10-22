@@ -33,30 +33,7 @@ func scanDir(dirName string, out *os.File, cv CredentialValidator) error {
 			}
 		} else {
 			wg.Add(1)
-			go func(wg *sync.WaitGroup, name string) {
-
-				defer wg.Done()
-				f, err := os.Open(dirName + "/" + name)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-
-				// close the file after execution if
-				// there is no error in opening file
-				defer f.Close()
-
-				if err := scanFile(cv, f, out); err != nil {
-					switch err {
-					case errorInvalidCreds, errorNoMatch:
-						return
-					default:
-						log.Println(err)
-						return
-					}
-				}
-
-			}(&wg, file.Name())
+			go scanFileStart(&wg,file.Name(), dirName, out, cv)
 		}
 
 	}
@@ -65,8 +42,35 @@ func scanDir(dirName string, out *os.File, cv CredentialValidator) error {
 	return nil
 }
 
+
+func scanFileStart(wg *sync.WaitGroup, name string , dirName string, out *os.File, cv CredentialValidator){
+
+	// Early return or panic here would still call wg.Done()
+	defer wg.Done()
+
+	file, err := os.Open(dirName + "/" + name)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// close the file after execution if
+	defer file.Close()
+
+	if err := scanFile(cv, file, out); err != nil {
+		switch err {
+		case errorInvalidCreds, errorNoMatch:
+			return
+		default:
+			log.Println(err)
+			return
+		}
+	}
+}
+
 // Scans a file for valid secrets
 func scanFile(cv CredentialValidator, in, out *os.File) error {
+
 	fileContent, err := io.ReadAll(in)
 	if err != nil {
 		return err
@@ -78,8 +82,9 @@ func scanFile(cv CredentialValidator, in, out *os.File) error {
 	}
 
 	result := ""
-	for _, c := range cc {
-		result += fmt.Sprintf("\t\t\tValid secrets found in file %s:\n\t\t\tAccess Key: %s\n\t\t\tSecret Access Key: %s\n\n", in.Name(), c.Id, c.Secret)
+
+	for _, value := range cc {
+		result += fmt.Sprintf("\t\t\tValid secrets found in file %s:\n\t\t\tAccess Key: %s\n\t\t\tSecret Access Key: %s\n\n", in.Name(), value.Id, value.Secret)
 	}
 
 	_, err = out.Write([]byte(result))

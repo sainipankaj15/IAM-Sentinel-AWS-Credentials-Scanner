@@ -46,8 +46,6 @@ func validateIAMKeys(accessKeyID, secretAccessKey string) bool {
 		Region:      aws.String("ap-south-1"),
 		Credentials: credentials.NewStaticCredentials(accessKeyID, secretAccessKey, ""),
 	})
-	// Unnecessary to handle error since session created is static
-	// it doesn't send any request
 
 	// Create a new iam service client using the session
 	svc := iam.New(sess)
@@ -55,13 +53,9 @@ func validateIAMKeys(accessKeyID, secretAccessKey string) bool {
 	// Basic API call to check the IAM keys' validity
 	d, err := svc.ListGroups(&iam.ListGroupsInput{})
 	if err != nil {
+
 		// InvalidClientTokenId error occurs for invalid keys.
-		// If keys are valid, if the role doesn't have permission
-		// to list groups, it returns an AccessDenied error
-		if strings.Contains(err.Error(), "InvalidClientTokenId") {
-			return false
-		}
-		return true
+		return !strings.Contains(err.Error(), "InvalidClientTokenId")
 	}
 
 	fmt.Print(d)
