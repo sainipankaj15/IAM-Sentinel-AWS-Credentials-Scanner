@@ -1,57 +1,52 @@
-# Credential-Scanner
+# IAM Sentinel: AWS Credentials Scanner
 
-Credential-Scanner is a GoLang script that scans a Git repository (GitHub/GitLab/Bitbucket) for any embedded, valid AWS IAM keys. It checks the validity of the Access Key ID by invoking a basic API call supported by AWS. This tool helps identify potential security risks where AWS IAM keys may have been hardcoded in application code, which could be visible to multiple organizational members, leading to misuse.
+- This GoLang project's main motive is to find valid IAM Credentials that the developer left in the codebase(obviously by mistake).
+- This project scans a Git repository and looks for valid AWS IAM keys. It checks the validity of the Access Key ID by invoking a basic API call supported by AWS. This application helps identify security risks where AWS IAM keys may have been hard coded in application code, which could be visible to multiple organizational members and lead to misuse.
 
 ## Prerequisites
 
-To run the AWS IAM Key Validator, you need to have Go installed on your system. You can download and install Go from the official Go website: https://golang.org/dl/
+To run this project in your local, you must have to Golang installed on your system.
 
 ## Usage
 
-Clone the repository locally and run:
+- Let say you want to check for this repoistry https://github.com/sainipankaj15/Testing-Repo-for-credentials-checker
+- First run :
         
+        go mod tidy
+
+- then :  
+
         go run . <repo_url>
 
-for example:
+- For above example:
 
-        go run . https://github.com/abhishek-pingsafe/Devops-Node
+        go run . https://github.com/sainipankaj15/Testing-Repo-for-credentials-checker
 
+The project will attempt to validate the provided Access Key ID by making a basic API call to AWS.
 
-The script will attempt to validate the provided Access Key ID by making a basic API call to AWS. The report of the scan will be logged in a `logs` directory under the name `<repo_name>-result.txt` (like `Devops-Node-result.txt`).
+## Result
 
-## Result Screenshot
+The result is stored in a `logs/` directory under the name `<repo_name>-result.txt`
 
-The result is stored in a `logs/` directory under the name `<repo_name>-result.txt` (Here `Devops-Node-result.txt`).
+## Things that makes better this project
 
-<img width="1680" alt="image" src="https://github.com/sreenikethMadgula/credential-scanner/assets/56798332/5fa82c6d-136a-4c72-8743-971d71fd61cd">
+1. Faster Execution
 
+- Concurrency is implemented in `scanDir()` to concurrently process files in a directory.
 
-## Attempted Enhancements
-1. Extensibility
+2. Baseline definition
 
-To extend support to validate other cloud credentials, the `CredentialValidator` interface can be implemented for another type (say `gcpValidator`) in a new file (like `aws_validator.go`).
+- This project offers the capability to define a baseline file to ignore items
+during the next scan that are present in the baseline. The user will be able to generate the baseline file with the help of this script.
+- This feature is helpful if the user is running the script every week and doesn’t want to see the same findings again and again.
 
-A command line argument can be accepted to initialize a `CredentialValidator` as such:
+- For example :
+  - First time you scan one repository 
 
-        go run . <repo_url> <cloud>
+<img src="./pic/Screenshot%20from%202023-11-18%2011-22-06.png">
 
-for example
+PS: There is no need to be confused because of "Error during reading file" in the screenshot. It is because the first time we ran this project for any repo, we didn't have the baseline file where we track all the scanned commit details.
 
-        go run . https://github.com/abhishek-pingsafe/Devops-Node aws
+  - Second time you scan same repository 
 
-The `main()` can have a factory to initialize a `CredentialValidator` based on the cloud passed as command line argument.
-
-2. Faster Execution
-
-Concurrency is implemented in `scanDir()` to concurrently process files in a directory.
-
-
-## Further enhancements
-
-1. Better logging - add a custom logger
-2. Base64 decoding
-3. Baseline definition - Offer the capability to define a baseline file, to ignore items
-during the next scan that are present in the baseline. The user should be able to
-generate the baseline file with the help of this script.
-This feature is useful if the user is running the script every week and doesn’t want to
-see the same findings again and again.
+<img src="./pic/Screenshot%20from%202023-11-18%2011-22-26.png">
