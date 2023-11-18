@@ -43,10 +43,12 @@ during the next scan that are present in the baseline. The user will be able to 
 - For example :
   - First time you scan one repository 
 
-<img src="./pic/Screenshot%20from%202023-11-18%2011-22-06.png">
+<img src="./pic/firstTime.png">
 
 PS: There is no need to be confused because of "Error during reading file" in the screenshot. It is because the first time we ran this project for any repo, we didn't have the baseline file where we track all the scanned commit details.
 
   - Second time you scan same repository 
 
-<img src="./pic/Screenshot%20from%202023-11-18%2011-22-26.png">
+<img src="./pic/secondTime.png">
+
+    - Here, we can see that when we run our project for the same repository, we have already scanned commits information, so we skipped them.
